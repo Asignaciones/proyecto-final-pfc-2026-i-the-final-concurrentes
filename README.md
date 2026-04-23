@@ -1,21 +1,90 @@
-# Asignación: [Nombre de la asignación]
+# Proyecto Final — Asignación Óptima de Aulas
+## Fundamentos de Programación Funcional y Concurrente
 
-**Fecha:** [DD/MM/AAAA]
-**Curso:** [Nombre del Curso]
-
----
-
-## 👥 Integrantes del Grupo
-
-| Nombre Completo | Código | Rol            | Correo Electrónico        |
-| --------------- | ------ | -------------- | ------------------------- |
-| [Estudiante 1]  | 123456 | [Líder/Colab.] | [correo1@institucion.edu] |
-| [Estudiante 2]  | 123457 | [Colaborador]  | [correo2@institucion.edu] |
-| [Estudiante 3]  | 123458 | [Colaborador]  | [correo3@institucion.edu] |
+**Fecha de entrega:** Miércoles, 03 de junio de 2026 a las 17:58:59
+**Sustentación:** Jueves, 04 de junio de 2026 en horario de clase
+**Docente:** Carlos Andres Delgado S — carlos.andres.delgado@correounivalle.edu.co
 
 ---
 
-## 📌 Descripción de la Asignación
+## Integrantes del grupo
 
-[Breve párrafo explicando el propósito y objetivos del taller (4-6 líneas). Ejemplo:]
-_"Este taller busca analizar [tema principal] mediante [metodología]. Los objetivos incluyen [objetivo 1], [objetivo 2] y [objetivo 3], aplicando conceptos vistos en clase como [concepto relevante]."_
+| Nombre completo | Código | Correo institucional |
+|-----------------|--------|----------------------|
+| [Estudiante 1]  |        |                      |
+| [Estudiante 2]  |        |                      |
+| [Estudiante 3]  |        |                      |
+
+**Obligatorio:** editar esta tabla con los datos reales de todos los integrantes.
+Si un integrante no aparece aquí, su nota individual será 0.0.
+
+---
+
+## Descripción
+
+El proyecto consiste en implementar, en Scala, una solución funcional y paralela al
+**problema de la asignación óptima de aulas**: dado un conjunto de cursos y un conjunto
+de aulas, encontrar la asignación que minimiza una función de costo que combina choques
+de horario, desperdicio de capacidad y distancia de movilidad entre aulas consecutivas.
+
+El enunciado completo está disponible en el campus virtual.
+
+---
+
+## Estructura del repositorio
+
+```
+proyecto-final-2026-1/
+├── .github/workflows/      ← CI — NO EDITAR
+├── app/
+│   ├── build.gradle        ← NO EDITAR
+│   ├── scalastyle_config.xml ← NO EDITAR
+│   └── src/
+│       ├── main/scala/
+│       │   ├── proyecto/
+│       │   │   ├── App.scala
+│       │   │   ├── AsignacionAulas.scala     ← versión secuencial
+│       │   │   └── AsignacionAulasPar.scala  ← versión paralela
+│       │   └── common/
+│       │       └── package.scala             ← NO EDITAR
+│       └── test/scala/proyecto/
+│           ├── AsignacionAulasTest.scala
+│           └── AsignacionAulasParTest.scala
+├── docs/
+│   ├── Proceso.md          ← informe de proceso (completar)
+│   ├── Correccion.md       ← informe de corrección (completar)
+│   ├── Paralelizacion.md   ← informe de paralelización (completar)
+│   ├── Conclusiones.md     ← conclusiones (completar)
+│   └── GuiaMarkdown.md     ← referencia de sintaxis Markdown/LaTeX/Mermaid
+├── gradle/                 ← NO EDITAR
+├── gradlew                 ← NO EDITAR
+├── gradlew.bat             ← NO EDITAR
+├── settings.gradle         ← NO EDITAR
+└── README.md               ← EDITAR con integrantes
+```
+
+---
+
+## Cómo correr el proyecto
+
+```bash
+# Compilar
+./gradlew compileScala
+
+# Ejecutar pruebas
+./gradlew test
+
+# Ver reporte de pruebas
+open app/build/reports/tests/test/index.html
+```
+
+---
+
+## Reglas
+
+- No usar variables mutables, ciclos `for`/`while` ni `return`.
+- No modificar `build.gradle`, `settings.gradle`, `gradlew`, `gradlew.bat`,
+  `gradle/`, `.github/workflows/`, `scalastyle_config.xml` ni el paquete `common`.
+- Los informes van en `docs/` en formato Markdown; no se aceptan otros formatos.
+- Usar notación matemática en LaTeX dentro de los Markdown.
+- Diagramas de pila de llamadas con Mermaid (no imágenes).

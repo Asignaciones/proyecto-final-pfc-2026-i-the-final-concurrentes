@@ -54,7 +54,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'taller.App'
+    mainClass = 'proyecto.App'
 }
 
 // Necesario para que IntelliJ y Gradle coincidan en el runner de tests

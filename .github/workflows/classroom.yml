@@ -1,0 +1,39 @@
+name: Autograding Tests
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compilar
+        id: compilar
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Compilar proyecto
+          setup-command: chmod +x gradlew
+          command: ./gradlew compileScala compileTestScala
+          timeout: 10
+          max-score: 75
+
+      - name: Reporte de calificación
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          COMPILAR_RESULTS: "${{steps.compilar.outputs.result}}"
+        with:
+          runners: compilar

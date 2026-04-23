@@ -1,5 +1,3 @@
-q
-
 # Informe de proceso Algoritmo Factorial con Recursión de Cola
 
 ## Definición del Algoritmo
