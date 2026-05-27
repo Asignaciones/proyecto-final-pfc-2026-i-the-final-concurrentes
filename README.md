@@ -12,9 +12,10 @@
 
 | Nombre completo | Código | Correo institucional |
 |-----------------|--------|----------------------|
-| [Estudiante 1]  |        |                      |
-| [Estudiante 2]  |        |                      |
-| [Estudiante 3]  |        |                      |
+| [Oliver De Jesus Arboleda Baez]  | [202459684] | [oliver.arboleda@correounivalle.edu.co] |
+| [Estudiante 2]  | [código] | [correo@universitario.edu] |
+| [Estudiante 2]  | [código] | [correo@universitario.edu] |
+| [Estudiante 2]  | [código] | [correo@universitario.edu] |
 
 **Obligatorio:** editar esta tabla con los datos reales de todos los integrantes.
 Si un integrante no aparece aquí, su nota individual será 0.0.
