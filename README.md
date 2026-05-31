@@ -13,9 +13,9 @@
 | Nombre completo | Código | Correo institucional |
 |-----------------|--------|----------------------|
 | [Oliver De Jesus Arboleda Baez]  | [202459684] | [oliver.arboleda@correounivalle.edu.co] |
-| [Estudiante 2]  | [código] | [correo@universitario.edu] |
-| [Estudiante 2]  | [código] | [correo@universitario.edu] |
-| [Estudiante 2]  | [código] | [correo@universitario.edu] |
+| [Jose David Jaramillo Rebellon]  | [202459558] | [jose.david.jaramillo@correounivalle.co] |
+| [Juan Esteban Aguirre Castañeda] | [202459676] | [juan.esteban.aguirre@correounivalle.edu.co] |
+| [Jhoan Fabricio Hurtado Marin]   | [202459472] | [hurtado.jhoan@correounivalle.edu.co] |
 
 **Obligatorio:** editar esta tabla con los datos reales de todos los integrantes.
 Si un integrante no aparece aquí, su nota individual será 0.0.
