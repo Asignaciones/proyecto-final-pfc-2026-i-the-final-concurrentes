@@ -14,12 +14,45 @@ class AsignacionAulasParTest extends AnyFunSuite {
   val d1: Distancias = Vector(Vector(0, 3), Vector(3, 0))
   val w: Pesos      = (1000, 100, 1, 2)
 
-  test("choquesPar: asignacion [0,0,1] tiene 1 choque") {
-    assert(choquesPar(c1, Vector(0, 0, 1)) == 1)
+  test("choquesPar - mismo resultado que choques version secuencial (ejemplo 1, alpha1)") {
+    val asig1: Asignacion = Vector(0, 0, 1)
+    assert(choquesPar(c1, asig1) == choques(c1, asig1))
+    assert(choquesPar(c1, asig1) == 1)
   }
 
-  test("choquesPar: asignacion [0,1,0] no tiene choques") {
-    assert(choquesPar(c1, Vector(0, 1, 0)) == 0)
+  test("choquesPar - mismo resultado que choques version secuencial (ejemplo 1, alpha2)") {
+    val asig2: Asignacion = Vector(0, 1, 0)
+    assert(choquesPar(c1, asig2) == choques(c1, asig2))
+    assert(choquesPar(c1, asig2) == 0)
+  }
+
+  test("choquesPar - sin solapamientos devuelve 0") {
+    val cursos: Cursos = Vector(
+      ("C1", 4, 8, 20),
+      ("C2", 8, 12, 20)
+    )
+    assert(choquesPar(cursos, Vector(0, 0)) == 0)
+  }
+
+  test("choquesPar - detecta choques cruzados entre mitades") {
+    val cursos: Cursos = Vector(
+      ("C0", 0, 6, 20),
+      ("C1", 8, 12, 20),
+      ("C2", 3, 9, 20),
+      ("C3", 14, 18, 20)
+    )
+    val asig: Asignacion = Vector(0, 1, 0, 1)
+    assert(choquesPar(cursos, asig) == choques(cursos, asig))
+  }
+
+  test("choquesPar - multiples choques misma aula") {
+    val cursos: Cursos = Vector(
+      ("C0", 0, 10, 10),
+      ("C1", 2, 12, 10),
+      ("C2", 4, 14, 10),
+      ("C3", 6, 16, 10)
+    )
+    assert(choquesPar(cursos, Vector(0, 0, 0, 0)) == 6)
   }
 
   test("desperdicioPar: asignacion [0,0,1] tiene desperdicio 25") {
