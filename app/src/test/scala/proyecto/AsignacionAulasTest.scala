@@ -62,17 +62,84 @@ class AsignacionAulasTest extends AnyFunSuite {
   }
 
   // generarAsignaciones
-  test("generarAsignaciones: 2 cursos y 2 aulas produce 4 asignaciones") {
-    assert(generarAsignaciones(2, 2).length == 4)
+  test("generarAsignaciones - caso base: 0 cursos produce una asignacion vacia") {
+    val resultado = generarAsignaciones(0, 3)
+    assert(resultado == Vector(Vector.empty))
   }
 
-  test("generarAsignaciones: 3 cursos y 3 aulas produce 27 asignaciones") {
-    assert(generarAsignaciones(3, 3).length == 27)
+  test("generarAsignaciones - 1 curso y 3 aulas produce 3 asignaciones") {
+    val resultado = generarAsignaciones(1, 3)
+    assert(resultado.length == 3)
+    assert(resultado.contains(Vector(0)))
+    assert(resultado.contains(Vector(1)))
+    assert(resultado.contains(Vector(2)))
+  }
+
+  test("generarAsignaciones - 2 cursos y 2 aulas produce 4 asignaciones (2^2)") {
+    val resultado = generarAsignaciones(2, 2)
+    assert(resultado.length == 4)
+    assert(resultado.contains(Vector(0, 0)))
+    assert(resultado.contains(Vector(0, 1)))
+    assert(resultado.contains(Vector(1, 0)))
+    assert(resultado.contains(Vector(1, 1)))
+  }
+
+  test("generarAsignaciones - 3 cursos y 2 aulas produce 8 asignaciones (2^3)") {
+    val resultado = generarAsignaciones(3, 2)
+    assert(resultado.length == 8)
+  }
+
+  test("generarAsignaciones - 2 cursos y 3 aulas produce 9 asignaciones (3^2)") {
+    val resultado = generarAsignaciones(2, 3)
+    assert(resultado.length == 9)
+    // Verifica que todas las combinaciones estan presentes
+    val esperadas = for {
+      a <- 0 until 3
+      b <- 0 until 3
+    } yield Vector(a, b)
+    esperadas.foreach { e => assert(resultado.contains(e)) }
+  }
+
+  test("generarAsignaciones - todas las asignaciones tienen longitud n") {
+    val n = 4
+    val m = 3
+    val resultado = generarAsignaciones(n, m)
+    assert(resultado.forall(_.length == n))
+  }
+
+  test("generarAsignaciones - los valores estan en rango [0, m-1]") {
+    val m = 3
+    val resultado = generarAsignaciones(3, m)
+    assert(resultado.forall(_.forall(v => v >= 0 && v < m)))
   }
 
   // asignacionOptima
-  test("asignacionOptima: el costo de la optima no supera el de [0,1,0] (37)") {
-    val (_, costo) = asignacionOptima(c1, a1, d1, w)
-    assert(costo <= 37)
+  test("asignacionOptima - ejemplo 1: el costo optimo es 37") {
+    val (asig, costo) = asignacionOptima(c1, a1, d1, w)
+    assert(costo == 37)
+    assert(asig == Vector(0, 1, 0))
+  }
+
+  test("asignacionOptima - la asignacion optima no tiene choques") {
+    val (asig, _) = asignacionOptima(c1, a1, d1, w)
+    assert(choques(c1, asig) == 0)
+  }
+
+  test("asignacionOptima - la asignacion resultante tiene longitud igual al numero de cursos") {
+    val (asig, _) = asignacionOptima(c1, a1, d1, w)
+    assert(asig.length == c1.length)
+  }
+
+  test("asignacionOptima - todos los cursos quedan asignados (sin -1)") {
+    val (asig, _) = asignacionOptima(c1, a1, d1, w)
+    assert(asig.forall(_ >= 0))
+  }
+
+  test("asignacionOptima - prefiere evitar choques sobre minimizar desperdicio") {
+    val cursos: Cursos = Vector(("C0", 0, 6, 10), ("C1", 3, 9, 10))
+    val aulas: Aulas = Vector(("A0", 50), ("A1", 50))
+    val dist: Distancias = Vector(Vector(0, 1), Vector(1, 0))
+    val (asig, _) = asignacionOptima(cursos, aulas, dist, w)
+    assert(asig(0) != asig(1))
   }
 }

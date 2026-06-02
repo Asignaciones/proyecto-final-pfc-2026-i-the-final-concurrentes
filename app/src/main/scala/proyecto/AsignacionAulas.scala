@@ -113,12 +113,25 @@ object AsignacionAulas {
    * Genera todas las asignaciones completas posibles: vectores en {0,..,m-1}^n.
    * El tamaño del resultado es m^n.
    */
-  def generarAsignaciones(n: Int, m: Int): Vector[Asignacion] = ???
+  def generarAsignaciones(n: Int, m: Int): Vector[Asignacion] = {
+    if (n == 0) Vector(Vector.empty)
+    else {
+      val subAsignaciones = generarAsignaciones(n-1, m)
+      (0 until m).toVector.flatMap { aula =>
+        subAsignaciones.map { sub => aula +: sub }
+      }
+    }
+  }
 
   /**
    * Devuelve la asignación de mínimo costo y su costo.
    * Usa generarAsignaciones para explorar el espacio.
    */
   def asignacionOptima(cursos: Cursos, aulas: Aulas, d: Distancias,
-                       w: Pesos): (Asignacion, Int) = ???
+                       w: Pesos): (Asignacion, Int) = {
+    val todasLasAsignaciones = generarAsignaciones(cursos.length, aulas.length)
+    todasLasAsignaciones.map { a =>
+      (a, costoAsignacion(cursos, aulas, d, a, w))
+    }.minBy { case (_, costo) => costo }
+  }
 }
