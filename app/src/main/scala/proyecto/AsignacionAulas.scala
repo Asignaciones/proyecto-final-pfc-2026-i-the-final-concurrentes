@@ -63,16 +63,34 @@ object AsignacionAulas {
   // ---------------------------------------------------------------------------
 
   /** Devuelve true sii los intervalos [ini1, fin1) y [ini2, fin2) se traslapan. */
-  def solapan(c1: Curso, c2: Curso): Boolean = ???
+  def solapan(c1: Curso, c2: Curso): Boolean =
+    iniCurso(c1) < finCurso(c2) && iniCurso(c2) < finCurso(c1)
 
   /**
    * Número de pares (i, j) con i < j tales que a(i) == a(j) >= 0
    * y los cursos i y j se solapan.
    */
-  def choques(cursos: Cursos, a: Asignacion): Int = ???
+  def choques(cursos: Cursos, a: Asignacion): Int = {
+    val indices = cursos.indices.toVector
+    //Pares (i, j) con i < j
+    val pares = for {
+      i <- indices
+      j <- indices
+    } yield (i, j)
+
+    pares.count { case (i, j) =>
+      a(i) >= 0 && a(j) >= 0 &&
+      a(i) == a(j) &&
+      solapan(cursos(i), cursos(j))
+    }
+  }
 
   /** Cantidad de cursos cuya aula asignada tiene capacidad menor al número de estudiantes. */
-  def capacidadFallida(cursos: Cursos, aulas: Aulas, a: Asignacion): Int = ???
+  def capacidadFallida(cursos: Cursos, aulas: Aulas, a: Asignacion): Int =
+    cursos.indices.toVector.count { i =>
+      val j = a(i)
+      j >= 0 && capAula(aulas(j)) < estCurso(cursos(i))
+    }
 
   /**
    * Suma de (cap(aula_i) - est(curso_i)) para los cursos asignados
@@ -95,12 +113,25 @@ object AsignacionAulas {
    * Genera todas las asignaciones completas posibles: vectores en {0,..,m-1}^n.
    * El tamaño del resultado es m^n.
    */
-  def generarAsignaciones(n: Int, m: Int): Vector[Asignacion] = ???
+  def generarAsignaciones(n: Int, m: Int): Vector[Asignacion] = {
+    if (n == 0) Vector(Vector.empty)
+    else {
+      val subAsignaciones = generarAsignaciones(n-1, m)
+      (0 until m).toVector.flatMap { aula =>
+        subAsignaciones.map { sub => aula +: sub }
+      }
+    }
+  }
 
   /**
    * Devuelve la asignación de mínimo costo y su costo.
    * Usa generarAsignaciones para explorar el espacio.
    */
   def asignacionOptima(cursos: Cursos, aulas: Aulas, d: Distancias,
-                       w: Pesos): (Asignacion, Int) = ???
+                       w: Pesos): (Asignacion, Int) = {
+    val todasLasAsignaciones = generarAsignaciones(cursos.length, aulas.length)
+    todasLasAsignaciones.map { a =>
+      (a, costoAsignacion(cursos, aulas, d, a, w))
+    }.minBy { case (_, costo) => costo }
+  }
 }
