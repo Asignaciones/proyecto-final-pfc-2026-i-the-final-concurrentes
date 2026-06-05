@@ -71,17 +71,18 @@ object AsignacionAulas {
    * y los cursos i y j se solapan.
    */
   def choques(cursos: Cursos, a: Asignacion): Int = {
-    val indices = cursos.indices.toVector
-    //Pares (i, j) con i < j
-    val pares = for {
-      i <- indices
-      j <- indices
-    } yield (i, j)
 
-    pares.count { case (i, j) =>
-      a(i) >= 0 && a(j) >= 0 &&
-      a(i) == a(j) &&
-      solapan(cursos(i), cursos(j))
+    val paresValidos =
+      for {
+        i <- cursos.indices.toVector
+        j <- (i + 1 until cursos.length)
+      } yield (i, j)
+
+    paresValidos.count {
+      case (i, j) =>
+        a(i) >= 0 &&
+          a(i) == a(j) &&
+          solapan(cursos(i), cursos(j))
     }
   }
 
@@ -96,18 +97,79 @@ object AsignacionAulas {
    * Suma de (cap(aula_i) - est(curso_i)) para los cursos asignados
    * con capacidad suficiente.
    */
-  def desperdicio(cursos: Cursos, aulas: Aulas, a: Asignacion): Int = ???
+  def desperdicio(
+                   cursos: Cursos,
+                   aulas: Aulas,
+                   a: Asignacion
+                 ): Int = {
+
+    cursos.indices.foldLeft(0) { (acum, i) =>
+
+      val aulaAsignada = a(i)
+
+      if (aulaAsignada >= 0) {
+
+        val capacidad = capAula(aulas(aulaAsignada))
+        val estudiantes = estCurso(cursos(i))
+
+        if (capacidad >= estudiantes)
+          acum + (capacidad - estudiantes)
+        else
+          acum
+
+      } else acum
+    }
+  }
 
   /**
    * Ordena los cursos asignados por hora de inicio y suma las distancias
    * entre aulas de cursos consecutivos.
    */
-  def movilidad(cursos: Cursos, aulas: Aulas, d: Distancias,
-                a: Asignacion): Int = ???
+  def movilidad(
+                 cursos: Cursos,
+                 aulas: Aulas,
+                 d: Distancias,
+                 a: Asignacion
+               ): Int = {
+
+    val cursosAsignados =
+      cursos.indices
+        .filter(i => a(i) >= 0)
+        .sortBy(i => iniCurso(cursos(i)))
+
+    cursosAsignados
+      .sliding(2)
+      .foldLeft(0) {
+
+        case (acum, Vector(i, j)) =>
+          acum + d(a(i))(a(j))
+
+        case (acum, _) =>
+          acum
+      }
+  }
 
   /** Costo total: w_CH * CH + w_CF * CF + w_DE * DE + w_MV * MV. */
-  def costoAsignacion(cursos: Cursos, aulas: Aulas, d: Distancias,
-                      a: Asignacion, w: Pesos): Int = ???
+  def costoAsignacion(
+                       cursos: Cursos,
+                       aulas: Aulas,
+                       d: Distancias,
+                       a: Asignacion,
+                       w: Pesos
+                     ): Int = {
+
+    val (wCH, wCF, wDE, wMV) = w
+
+    val ch = choques(cursos, a)
+    val cf = capacidadFallida(cursos, aulas, a)
+    val de = desperdicio(cursos, aulas, a)
+    val mv = movilidad(cursos, aulas, d, a)
+
+    wCH * ch +
+      wCF * cf +
+      wDE * de +
+      wMV * mv
+  }
 
   /**
    * Genera todas las asignaciones completas posibles: vectores en {0,..,m-1}^n.
