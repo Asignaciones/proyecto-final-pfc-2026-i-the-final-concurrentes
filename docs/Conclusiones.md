@@ -1,6 +1,11 @@
 # Conclusiones
 
-**Integrantes:** [completar]
+**Integrantes:**
+[  Oliver De Jesus Arboleda Baez,
+Jose David Jaramillo Rebellon,
+Juan Esteban Aguirre Castañeda,
+Jhoan Fabricio Hurtado Marin
+]
 
 ---
 
@@ -19,15 +24,6 @@ Presente aquí las conclusiones del proyecto. Como mínimo debe responder:
 
 4. **Aprendizajes:** ¿Qué conceptos del curso les resultaron más útiles para resolver
    el problema? ¿Qué cambiarían en su diseño si volvieran a empezar?
-
----
-
-**Integrantes:** 
-[  Oliver De Jesus Arboleda Baez,
-   Jose David Jaramillo Rebellon,
-   Juan Esteban Aguirre Castañeda,
-   Jhoan Fabricio Hurtado Marin 
-]
 
 ---
 
