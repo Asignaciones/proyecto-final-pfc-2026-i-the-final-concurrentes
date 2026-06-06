@@ -182,6 +182,7 @@ class AsignacionAulasParTest extends AnyFunSuite {
 
   test("asignacionOptimaPar - mismo costo que version secuencial (ejemplo 2)") {
     val (_, costoSeq) = asignacionOptima(c2, a2, d2, w2)
+
     val (_, costoPar) = asignacionOptimaPar(c2, a2, d2, w2)
     assert(costoPar == costoSeq)
   }

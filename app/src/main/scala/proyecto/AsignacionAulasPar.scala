@@ -49,6 +49,7 @@ object AsignacionAulasPar {
                    a: Asignacion): Int = {
 
     // Índices ordenados por hora de inicio (solo cursos asignados)
+
     val ordenados =
       cursos.indices
         .filter(i => a(i) >= 0)
