@@ -1,4 +1,210 @@
 # Informe de Proceso
+---
+## `solapan`
+
+### Descripción
+
+`solapan(c1, c2)` determina si dos cursos se traslapan en el tiempo. Dos cursos se solapan si y solo si sus intervalos $[\text{ini}_1, \text{fin}_1)$ y $[\text{ini}_2, \text{fin}_2)$ tienen intersección no vacía.
+
+### Enfoque funcional
+
+La función es **no recursiva**: se implementa directamente con una expresión booleana que aplica la condición estándar de solapamiento de intervalos semi-abiertos.
+
+```scala
+def solapan(c1: Curso, c2: Curso): Boolean =
+  iniCurso(c1) < finCurso(c2) && iniCurso(c2) < finCurso(c1)
+```
+
+La condición equivale a negar la disjunción: dos intervalos **no** se solapan si uno termina antes de que el otro empiece, es decir $\text{fin}_1 \leq \text{ini}_2$ o $\text{fin}_2 \leq \text{ini}_1$. Por negación:
+
+$$\text{solapan}(c_1, c_2) \iff \text{ini}_1 < \text{fin}_2 \;\wedge\; \text{ini}_2 < \text{fin}_1$$
+
+### Ejemplo: M01 y M02 del enunciado
+
+**Entrada:**
+
+$$c_1 = \langle\text{M01}, 4, 8, 25\rangle, \quad c_2 = \langle\text{M02}, 6, 10, 30\rangle$$
+
+**Evaluación paso a paso:**
+
+```mermaid
+flowchart LR
+    A["solapan(M01, M02)"]
+    B["iniCurso(M01) < finCurso(M02)\n4 < 10 → true"]
+    C["iniCurso(M02) < finCurso(M01)\n6 < 8 → true"]
+    D["true && true → true"]
+
+    A --> B --> D
+    A --> C --> D
+```
+
+| Subexpresión | Valor |
+|---|---|
+| `iniCurso(c1)` | 4 |
+| `finCurso(c2)` | 10 |
+| `4 < 10` | `true` |
+| `iniCurso(c2)` | 6 |
+| `finCurso(c1)` | 8 |
+| `6 < 8` | `true` |
+| **Resultado** | **`true`** |
+
+### Ejemplo: M01 y M03 (no solapan)
+
+$$c_1 = \langle\text{M01}, 4, 8, 25\rangle, \quad c_3 = \langle\text{M03}, 12, 16, 20\rangle$$
+
+| Subexpresión | Valor |
+|---|---|
+| `4 < 16` | `true` |
+| `12 < 8` | **`false`** |
+| **Resultado** | **`false`** |
+
+La segunda condición falla porque M03 comienza después de que M01 termina.
+
+### Complejidad
+
+La función evalúa exactamente dos comparaciones de enteros y una conjunción lógica:
+
+$$T = O(1)$$
+
+---
+
+## `choques`
+
+### Descripción
+
+`choques(cursos, a)` cuenta el número de pares $(i, j)$ con $i < j$ tales que $\alpha_i = \alpha_j \geq 0$ y los cursos $c_i$ y $c_j$ se solapan en el tiempo. Formalmente:
+
+$$\text{CH}_C^\alpha = \bigl|\{(i,j) \mid 0 \leq i < j < n,\; \alpha_i = \alpha_j,\; \alpha_i \geq 0,\; \text{solapan}(c_i, c_j)\}\bigr|$$
+
+### Enfoque funcional
+
+Se usa una **comprensión de listas funcional** (`for` generador, no ciclo) para producir todos los pares $(i, j)$ con $i < j$, seguida de `count` para contar cuántos satisfacen las tres condiciones: misma aula, aula válida y solapamiento.
+
+```scala
+def choques(cursos: Cursos, a: Asignacion): Int = {
+  val indices = cursos.indices.toVector
+  val pares = for {
+    i <- indices
+    j <- indices
+    if i < j
+  } yield (i, j)
+
+  pares.count { case (i, j) =>
+    a(i) >= 0 && a(j) >= 0 &&
+    a(i) == a(j) &&
+    solapan(cursos(i), cursos(j))
+  }
+}
+```
+
+### Ejemplo: Ejemplo 1 del enunciado, $\alpha_1 = \langle 0, 0, 1\rangle$
+
+**Entrada:**
+
+$$C_1 = \langle\langle\text{M01},4,8,25\rangle,\langle\text{M02},6,10,30\rangle,\langle\text{M03},12,16,20\rangle\rangle, \quad \alpha = \langle 0, 0, 1\rangle$$
+
+**Pares generados y evaluación:**
+
+```mermaid
+flowchart TD
+    A["choques(C1, ⟨0,0,1⟩)"]
+    B["indices = Vector(0,1,2)"]
+    C["pares = (0,1),(0,2),(1,2)"]
+    D["count sobre cada par"]
+
+    E["(0,1): a(0)=0, a(1)=0\nmisma aula ✓\nsolapan(M01,M02) ✓\n→ cuenta"]
+    F["(0,2): a(0)=0, a(2)=1\ndistinta aula ✗\n→ no cuenta"]
+    G["(1,2): a(1)=0, a(2)=1\ndistinta aula ✗\n→ no cuenta"]
+    H["Resultado: 1"]
+
+    A --> B --> C --> D
+    D --> E --> H
+    D --> F --> H
+    D --> G --> H
+```
+
+| Par $(i,j)$ | $\alpha_i$ | $\alpha_j$ | Misma aula | Solapan | Cuenta |
+|---|---|---|---|---|---|
+| $(0,1)$ | 0 | 0 | ✓ | ✓ | **1** |
+| $(0,2)$ | 0 | 1 | ✗ | — | 0 |
+| $(1,2)$ | 0 | 1 | ✗ | — | 0 |
+| **Total** | | | | | **1** |
+
+
+### Complejidad
+
+La función genera todos los pares $(i, j)$ con $i < j$, de los cuales hay $\binom{n}{2}$ en total, y evalúa las condiciones en tiempo constante para cada par:
+
+$$T(n) = O(n^2)$$
+
+---
+
+## `capacidadFallida`
+
+### Descripción
+
+`capacidadFallida(cursos, aulas, a)` cuenta cuántos cursos están asignados a un aula cuya capacidad es **estrictamente menor** al número de estudiantes del curso:
+
+$$\text{CF}_C^\alpha = \bigl|\{i \mid \alpha_i \geq 0,\; \text{cap}(a_{\alpha_i}) < \text{est}(c_i)\}\bigr|$$
+
+### Enfoque funcional
+
+Se usa `count` sobre los índices del vector de cursos, aplicando la condición directamente sobre cada posición:
+
+```scala
+def capacidadFallida(cursos: Cursos, aulas: Aulas, a: Asignacion): Int =
+  cursos.indices.toVector.count { i =>
+    val j = a(i)
+    j >= 0 && capAula(aulas(j)) < estCurso(cursos(i))
+  }
+```
+
+La función no es recursiva: delega toda la iteración a `count`, que aplica el predicado a cada índice y acumula el total de resultados `true`.
+
+### Ejemplo: Ejemplo 2 del enunciado, $\alpha_1 = \langle 0, 1, 0, 1\rangle$
+
+**Entrada:**
+
+$$C_2 = \langle\langle\text{F01},0,4,40\rangle,\langle\text{F02},4,8,25\rangle,\langle\text{F03},8,12,50\rangle,\langle\text{F04},12,16,15\rangle\rangle$$
+
+$$A_2 = \langle\langle\text{S201},45\rangle,\langle\text{S202},30\rangle\rangle, \quad \alpha = \langle 0,1,0,1\rangle$$
+
+**Evaluación por índice:**
+
+```mermaid
+flowchart TD
+    A["capacidadFallida(C2, A2, ⟨0,1,0,1⟩)"]
+    B["count sobre índices 0,1,2,3"]
+
+    C["i=0: F01→S201\ncap=45, est=40\n45 < 40 → false"]
+    D["i=1: F02→S202\ncap=30, est=25\n30 < 25 → false"]
+    E["i=2: F03→S201\ncap=45, est=50\n45 < 50 → true ✓"]
+    F["i=3: F04→S202\ncap=30, est=15\n30 < 15 → false"]
+    G["Resultado: 1"]
+
+    A --> B
+    B --> C --> G
+    B --> D --> G
+    B --> E --> G
+    B --> F --> G
+```
+
+| $i$ | Curso | Aula asignada | cap | est | cap $<$ est | Falla |
+|---|---|---|---|---|---|---|
+| 0 | F01 | S201 | 45 | 40 | `false` | No |
+| 1 | F02 | S202 | 30 | 25 | `false` | No |
+| 2 | F03 | S201 | 45 | 50 | **`true`** | **Sí** |
+| 3 | F04 | S202 | 30 | 15 | `false` | No |
+| **Total** | | | | | | **1** |
+
+
+> **Nota:** Cuando `cap == est`, la condición `cap < est` es `false`, por lo que no se cuenta como fallo. La capacidad exacta es suficiente.
+
+### Complejidad
+
+La función recorre los $n$ cursos una sola vez, aplicando un predicado en tiempo constante a cada uno:
+
+$$T(n) = O(n)$$
 
 ---
 
