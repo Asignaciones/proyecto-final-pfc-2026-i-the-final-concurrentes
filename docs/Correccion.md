@@ -1,4 +1,194 @@
 # Informe de Corrección
+---
+
+## Corrección de `solapan`
+
+### Especificación formal
+
+Dados dos cursos $c_1 = \langle id_1, ini_1, fin_1, est_1 \rangle$ y $c_2 = \langle id_2, ini_2, fin_2, est_2 \rangle$, la función debe retornar `true` si y solo si los intervalos semi-abiertos $[ini_1, fin_1)$ y $[ini_2, fin_2)$ tienen intersección no vacía:
+
+$$\text{solapan}(c_1, c_2) = \text{true} \iff ini_1 < fin_2 \;\wedge\; ini_2 < fin_1$$
+
+### Argumentación
+
+La condición de solapamiento se deduce por negación. Dos intervalos **no** se solapan si y solo si uno termina antes de que el otro comience:
+
+$$\neg\,\text{solapan}(c_1, c_2) \iff fin_1 \leq ini_2 \;\vee\; fin_2 \leq ini_1$$
+
+Negando la disyunción con las leyes de De Morgan:
+
+$$\text{solapan}(c_1, c_2) \iff \neg(fin_1 \leq ini_2) \;\wedge\; \neg(fin_2 \leq ini_1) \iff ini_2 < fin_1 \;\wedge\; ini_1 < fin_2$$
+
+Que es lo que implementa la función:
+
+```scala
+def solapan(c1: Curso, c2: Curso): Boolean =
+  iniCurso(c1) < finCurso(c2) && iniCurso(c2) < finCurso(c1)
+```
+
+**Propiedad de simetría:** la condición es simétrica, es decir $\text{solapan}(c_1, c_2) = \text{solapan}(c_2, c_1)$, lo cual se verifica por conmutatividad de $\wedge$. ✓
+
+**Caso borde — frontera exacta:** si $fin_1 = ini_2$, entonces $ini_2 < fin_1$ es `false`, por lo que `solapan` retorna `false`. Esto es correcto: los intervalos $[0,4)$ y $[4,8)$ son adyacentes pero disjuntos. ✓
+
+### Verificación con los ejemplos
+
+| $c_1$ | $c_2$ | $ini_1 < fin_2$ | $ini_2 < fin_1$ | Resultado esperado | Resultado función |
+|---|---|---|---|---|---|
+| M01 $[4,8)$ | M02 $[6,10)$ | $4 < 10$ ✓ | $6 < 8$ ✓ | `true` | `true` |
+| M01 $[4,8)$ | M03 $[12,16)$ | $4 < 16$ ✓ | $12 < 8$ ✗ | `false` | `false` |
+| F01 $[0,4)$ | F02 $[4,8)$ | $0 < 8$ ✓ | $4 < 4$ ✗ | `false` | `false` |
+
+### Complejidad
+
+La función evalúa exactamente dos comparaciones enteras y una conjunción:
+
+$$T = O(1)$$
+
+### Conclusión
+
+`solapan`: implementa la condición matemática de solapamiento de intervalos semi-abiertos, con manejo correcto de los casos borde de frontera exacta.
+
+---
+
+## Corrección de `choques`
+
+### Especificación formal
+
+La función debe calcular:
+
+$$\text{CH}_C^\alpha = \bigl|\{(i,j) \mid 0 \leq i < j < n,\; \alpha_i = \alpha_j \geq 0,\; \text{solapan}(c_i, c_j)\}\bigr|$$
+
+### Argumentación por análisis estructural
+
+La implementación genera el conjunto de todos los pares $(i, j)$ con $i < j$ y cuenta cuántos satisfacen simultáneamente las tres condiciones de la especificación:
+
+```scala
+def choques(cursos: Cursos, a: Asignacion): Int = {
+  val indices = cursos.indices.toVector
+  val pares = for {
+    i <- indices
+    j <- indices
+    if i < j
+  } yield (i, j)
+
+  pares.count { case (i, j) =>
+    a(i) >= 0 && a(j) >= 0 &&
+    a(i) == a(j) &&
+    solapan(cursos(i), cursos(j))
+  }
+}
+```
+
+**Exhaustividad:** la comprensión `for` con la guarda `i < j` genera exactamente $\binom{n}{2}$ pares, que es el conjunto completo de pares ordenados sin repetición. No se omite ningún par. ✓
+
+**Sin duplicados:** dado que la guarda exige $i < j$ estrictamente, ningún par aparece dos veces en la lista. ✓
+
+**Corrección del predicado:** para cada par $(i, j)$, el predicado de `count` verifica las tres condiciones de la definición:
+
+1. $\alpha_i \geq 0 \;\wedge\; \alpha_j \geq 0$: ambos cursos están asignados. ✓
+2. $\alpha_i = \alpha_j$: están en la misma aula. ✓
+3. $\text{solapan}(c_i, c_j)$: sus intervalos se intersectan (correcta por la demostración de `solapan`). ✓
+
+Las tres condiciones deben cumplirse simultáneamente, lo cual se garantiza con `&&`. La conjunción es equivalente exacta a la definición formal. ✓
+
+### Verificación con los ejemplos
+
+**Ejemplo 1, $\alpha_1 = \langle 0, 0, 1\rangle$:**
+
+| Par $(i,j)$ | $\alpha_i$ | $\alpha_j$ | $\alpha_i = \alpha_j$ | $\text{solapan}$ | Cuenta |
+|---|---|---|---|---|---|
+| $(0,1)$ — M01, M02 | 0 | 0 | ✓ | ✓ ($[4,8) \cap [6,10) \neq \emptyset$) | **1** |
+| $(0,2)$ — M01, M03 | 0 | 1 | ✗ | — | 0 |
+| $(1,2)$ — M02, M03 | 0 | 1 | ✗ | — | 0 |
+| **Total** | | | | | **1** |
+
+
+**Ejemplo 1, $\alpha_2 = \langle 0, 1, 0\rangle$:**
+
+| Par $(i,j)$ | $\alpha_i$ | $\alpha_j$ | $\alpha_i = \alpha_j$ | Cuenta |
+|---|---|---|---|---|
+| $(0,1)$ | 0 | 1 | ✗ | 0 |
+| $(0,2)$ | 0 | 0 | ✓ | solapan(M01,M03)? $[4,8)\cap[12,16)=\emptyset$ → 0 |
+| $(1,2)$ | 1 | 0 | ✗ | 0 |
+| **Total** | | | | **0** |
+
+
+### Complejidad
+
+La comprensión genera $\binom{n}{2} = \frac{n(n-1)}{2}$ pares y evalúa el predicado en $O(1)$ para cada uno:
+
+$$T(n) = O(n^2)$$
+
+### Conclusión
+
+`choques`: genera todos los pares posibles sin omisiones ni duplicados, y aplica el predicado de la definición formal. La corrección depende de `solapan`, que fue demostrada correcta en la sección anterior.
+
+---
+
+## Corrección de `capacidadFallida`
+
+### Especificación formal
+
+La función debe calcular:
+
+$$\text{CF}_{C,A}^\alpha = \bigl|\{i \mid \alpha_i \geq 0,\; \text{cap}(a_{\alpha_i}) < \text{est}(c_i)\}\bigr|$$
+
+### Argumentación por análisis estructural
+
+```scala
+def capacidadFallida(cursos: Cursos, aulas: Aulas, a: Asignacion): Int =
+  cursos.indices.toVector.count { i =>
+    val j = a(i)
+    j >= 0 && capAula(aulas(j)) < estCurso(cursos(i))
+  }
+```
+
+**Exhaustividad:** `cursos.indices` produce el rango $\{0, 1, \ldots, n-1\}$, que es exactamente el conjunto de todos los índices de cursos. No se omite ningún curso. ✓
+
+**Corrección del predicado:** para cada índice $i$, sea $j = \alpha_i$. El predicado verifica:
+
+1. $j \geq 0$: el curso $i$ está asignado a alguna aula ($\alpha_i \neq -1$). ✓
+2. $\text{cap}(a_j) < \text{est}(c_i)$: la capacidad del aula es estrictamente menor al número de estudiantes. ✓
+
+La conjunción con `&&` es cortocircuitada: si $j < 0$ no se accede a `aulas(j)`, evitando un índice fuera de rango. ✓
+
+**Caso borde — capacidad exacta:** si $\text{cap}(a_j) = \text{est}(c_i)$, la condición `cap < est` es `false` y no se cuenta como fallo. Esto es correcto: una capacidad exacta satisface el requisito. ✓
+
+**Caso borde — curso sin asignar:** si $\alpha_i = -1$, la condición $j \geq 0$ es `false` y el cortocircuito impide evaluar la segunda parte. El curso no asignado no se cuenta como fallo de capacidad. ✓
+
+### Verificación con los ejemplos 
+
+**Ejemplo 2, $\alpha_1 = \langle 0, 1, 0, 1\rangle$, $A_2 = \langle\langle\text{S201},45\rangle, \langle\text{S202},30\rangle\rangle$:**
+
+| $i$ | Curso | $\alpha_i$ | Aula | cap | est | cap $<$ est | Cuenta |
+|---|---|---|---|---|---|---|---|
+| 0 | F01 | 0 | S201 | 45 | 40 | $45 < 40$: ✗ | 0 |
+| 1 | F02 | 1 | S202 | 30 | 25 | $30 < 25$: ✗ | 0 |
+| 2 | F03 | 0 | S201 | 45 | 50 | $45 < 50$: ✓ | **1** |
+| 3 | F04 | 1 | S202 | 30 | 15 | $30 < 15$: ✗ | 0 |
+| **Total** | | | | | | | **1** |
+
+
+**Ejemplo 2, $\alpha_2 = \langle 0, 1, 1, 0\rangle$:**
+
+| $i$ | Curso | Aula | cap | est | cap $<$ est | Cuenta |
+|---|---|---|---|---|---|---|
+| 0 | F01 | S201 | 45 | 40 | ✗ | 0 |
+| 1 | F02 | S202 | 30 | 25 | ✗ | 0 |
+| 2 | F03 | S202 | 30 | 50 | $30 < 50$: ✓ | **1** |
+| 3 | F04 | S201 | 45 | 15 | ✗ | 0 |
+| **Total** | | | | | | **1** |
+
+
+### Complejidad
+
+La función recorre los $n$ índices una sola vez, aplicando un predicado en $O(1)$:
+
+$$T(n) = O(n)$$
+
+### Conclusión
+
+`capacidadFallida`: recorre todos los cursos exactamente una vez, aplica el predicado de la definición formal con manejo correcto de los casos borde, y utiliza cortocircuito para garantizar seguridad en el acceso a índices.
 
 ---
 
