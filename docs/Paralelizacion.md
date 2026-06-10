@@ -1,6 +1,6 @@
 # Informe de paralelización
 
-**Integrantes:** [completar]
+**Integrantes:** [Jhoan Fabricio Hurtado, Oliver de Jesus Arboleda, Juan Esteban Aguirre, Jose David Jaramillo]
 
 ---
 
